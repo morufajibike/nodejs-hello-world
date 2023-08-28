@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-scan:
+  scan-with-sonarqube:
     runs-on: ubuntu-latest
 
     steps:
@@ -38,4 +38,22 @@ jobs:
       - uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
         timeout-minutes: 5
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}      
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  build-and-push-docker-image:
+    if: ${{ needs.scan-with-sonarqube.result == 'success' }}
+    needs: scan-with-sonarqube
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: docker build -t morufajibikehub/nodejs-hello-world:latest .
+
+      - name: Log in to Docker Hub
+        run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u morufajibikehub --password-stdin
+
+      - name: Push Docker image to Docker Hub
+        run: docker push morufajibikehub/nodejs-hello-world:latest
