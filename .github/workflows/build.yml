@@ -1,4 +1,4 @@
-name: SonarQube Analysis
+name: Build and Scan with SonarQube
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  sonarqube:
+  build-and-scan:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,10 +24,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm test
+      ## No tests defined
+      # - name: Run tests
+      #   run: npm test
 
-      - name: SonarQube Analysis
+      - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@v2.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
